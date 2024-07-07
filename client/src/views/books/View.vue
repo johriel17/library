@@ -1,6 +1,6 @@
 <template>
-<div class="my-5">
-    <div class="row">
+
+<div class="row">
   <div class="col-lg-12 mt-3">
     <div class="card">
       <div class="card-body">
@@ -51,7 +51,6 @@
       </div>
     </div>
   </div>
-</div>
 </div>
 </template>
 
