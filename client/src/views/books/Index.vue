@@ -4,7 +4,7 @@
   <div class="col-lg-12 mt-3">
     <div class="card">
       <div class="card-body">
-        <h4 class="header-title">Books</h4>
+        <h4 class="header-title">BOOKS</h4>
         <div class="clearfix"></div><hr>
         <div class="col-md-12">
 
