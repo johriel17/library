@@ -43,8 +43,8 @@
           </div>
           <div class="col-md-12">
             <div class="d-flex justify-content-end gap-2">
-                <a href="#/college/edit/{{ data.College.id }}" class="btn btn-primary btn-min"><i class="fa fa-edit"></i> EDIT </a>
-                <button class="btn btn-danger btn-min" ng-click="remove(data.College)"><i class="fa fa-trash"></i> DELETE </button>
+                <router-link :to="`/books/edit/${book.id}`" class="btn btn-primary btn-min"><i class="fa fa-edit"></i> EDIT </router-link>
+                <button class="btn btn-danger btn-min" @click="deleteBook(book.id)"><i class="fa fa-trash"></i> DELETE </button>
             </div>
           </div>
         </div>
@@ -73,6 +73,16 @@ export default {
                 return data
             }
             
+        },
+        async deleteBook(id){
+          if(confirm('Are you sure?')){
+
+          const res = await fetch(`http://localhost:4000/api/books/${id}`, {
+            method: 'DELETE',
+          })
+
+            this.$router.push('/books')
+          }
         }
     },
     async created(){
