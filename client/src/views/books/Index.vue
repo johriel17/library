@@ -8,7 +8,7 @@
         <div class="clearfix"></div><hr>
         <div class="col-md-12">
 
-        <ButtonGroup :addLabel="'Add Book'" :addPath="'books/add'" @search="search" />
+        <ButtonGroup :addLabel="'Add Book'" :addPath="'books/add'" @search="search" @reload="reload" />
 
         </div>
         <div class="clearfix"></div><hr>
@@ -123,8 +123,11 @@ export default {
             method: 'DELETE',
           })
 
-            this.fetchBooks()
+            await this.fetchBooks()
           }
+        },
+        async reload(){
+          await this.fetchBooks()
         }
     },
     async created() {

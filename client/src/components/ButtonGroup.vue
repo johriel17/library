@@ -38,6 +38,7 @@ export default {
   },
   methods: {
     reload() {
+      this.searchTxt = ''
       this.$emit("reload");
     }
   },
