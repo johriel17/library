@@ -71,7 +71,7 @@
           </div>
         </div>
         <div class="clearfix"></div>
-        <Pagination :pagination="pagination" @next-page="changePage" @last-page="changePage" @prev-page="changePage" @first-page="changePage" />
+        <Pagination v-show="pagination.totalPages > 0" :pagination="pagination" @next-page="changePage" @last-page="changePage" @prev-page="changePage" @first-page="changePage" />
       </div>
     </div>
   </div>
