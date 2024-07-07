@@ -57,7 +57,7 @@
 <script>
 
 export default {
-    name : 'BooksView',
+    name : 'Index',
     components: {
         
     },
