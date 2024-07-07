@@ -62,6 +62,9 @@
           </div>
         </td>
       </tr>
+      <tr v-show="!books.length > 0">
+        <td colspan="12" class="fw-bold">NO AVAILABLE DATA</td>
+      </tr>
     </tbody>
             </table>
           </div>
