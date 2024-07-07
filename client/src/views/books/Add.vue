@@ -66,6 +66,8 @@
 </template>
 
 <script>
+import { useToast } from "vue-toastification";
+
 export default {
     name : 'Add',
     data() {
@@ -83,6 +85,8 @@ export default {
     },
     methods : {
          async addBook() {
+           const toast = useToast();
+
             const bookData = {
                 bookNumber: this.bookNumber,
                 title: this.title,
@@ -105,11 +109,13 @@ export default {
                 const data = await res.json();
 
                 if (res.ok) {
+                    toast.success("Book added successfully!");
                     this.$router.push('/books')
                 } else {
                 console.error("Failed to add contact", res.status, res.statusText);
                 this.errorMessage = data.error;
                 this.errors = data.errors;
+                toast.error(this.errorMessage);
                 }
             } catch (error) {
                 console.error("Error:", error);

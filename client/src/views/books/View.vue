@@ -55,6 +55,8 @@
 </template>
 
 <script>
+import { useToast } from "vue-toastification";
+
 export default {
     name: 'View',
     data() {
@@ -75,12 +77,13 @@ export default {
             
         },
         async deleteBook(id){
+          const toast = useToast()
           if(confirm('Are you sure?')){
 
           const res = await fetch(`http://localhost:4000/api/books/${id}`, {
             method: 'DELETE',
           })
-
+            toast.warning('Book deleted successfully!')
             this.$router.push('/books')
           }
         }

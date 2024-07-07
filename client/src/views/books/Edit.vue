@@ -66,6 +66,8 @@
 </template>
 
 <script>
+import { useToast } from 'vue-toastification'
+
 export default {
     name : 'Edit',
     data() {
@@ -96,6 +98,7 @@ export default {
         },
 
         async updateBook(id){
+          const toast = useToast()
             const bookData = {
                 bookNumber: this.bookNumber,
                 title: this.title,
@@ -118,11 +121,13 @@ export default {
                 const data = await res.json();
 
                 if (res.ok) {
+                    toast.success('Book Updated Successfully!')
                     this.$router.push('/books')
                 } else {
                 console.error("Failed to edit contact", res.status, res.statusText);
                 this.errorMessage = data.error;
                 this.errors = data.errors;
+                toast.error(this.errorMessage)
                 }
             } catch (error) {
                 console.error("Error:", error);

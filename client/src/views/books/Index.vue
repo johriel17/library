@@ -82,6 +82,7 @@
 <script>
 import ButtonGroup from '@/components/ButtonGroup.vue'
 import Pagination from '@/components/Pagination.vue'
+import { useToast } from "vue-toastification";
 
 export default {
     name : 'Index',
@@ -117,12 +118,14 @@ export default {
           this.pagination = data.pagination
         },
         async deleteBook(id) {
+          const toast = useToast();
+
           if(confirm('Are you sure?')){
 
           const res = await fetch(`http://localhost:4000/api/books/${id}`, {
             method: 'DELETE',
           })
-
+            toast.warning("Book deleted successfully!");
             await this.fetchBooks()
           }
         },
