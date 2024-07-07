@@ -23,7 +23,7 @@
         </li>
       </ul>
       <div class="clearfix"></div>
-      <div class="text-center" ng-show="paginator.pageCount > 0">
+      <div class="text-center">
         <sup class="text-primary">Page {{pagination.currentPage}} of {{pagination.totalPages}}</sup>
       </div>
     </div>
