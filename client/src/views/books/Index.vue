@@ -57,6 +57,7 @@
                         ng-click="remove(data)"
                         class="btn btn-danger"
                         title="DELETE"
+                        @click="deleteBook(book.id)"
                         ><i class="fa fa-trash"></i
                       ></a>
                     </div>
@@ -115,6 +116,16 @@ export default {
           this.books = data.books
           this.pagination = data.pagination
         },
+        async deleteBook(id) {
+          if(confirm('Are you sure?')){
+
+          const res = await fetch(`http://localhost:4000/api/books/${id}`, {
+            method: 'DELETE',
+          })
+
+            this.fetchBooks()
+          }
+        }
     },
     async created() {
          await this.fetchBooks()
