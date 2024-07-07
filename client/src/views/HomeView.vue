@@ -17,7 +17,14 @@
             <div class="col-md-4 col-12 mb-2 item">
               <div @click="goToBorrowedBooks" class="card bg-primary bg-gradient shadow">
                 <div class="card-body">
-                  <h5 class="card-title text-center text-light">20 BORROWED BOOOKS</h5>
+                  <h5 class="card-title text-center text-light">{{borrowedBooks}} BORROWED BOOOKS</h5>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 col-12 mb-2 item">
+              <div @click="goToBorrowedBooks" class="card bg-primary bg-gradient shadow">
+                <div class="card-body">
+                  <h5 class="card-title text-center text-light">{{notReturnedBooks}} NOT RETURNED BOOOKS</h5>
                 </div>
               </div>
             </div>
@@ -38,7 +45,8 @@ export default {
   data() {
     return {
       books : 0,
-      borrowedBooks : 0
+      borrowedBooks : 0,
+      notReturnedBooks : 0
     }
   },
   methods:{
@@ -46,16 +54,28 @@ export default {
       this.$router.push('/books')
     },
     goToBorrowedBooks(){
-      this.$router.push('/books')
+      this.$router.push('/borrowed-books')
     },
     async countBooks(){
-      const res = await fetch('http://localhost:4000/api/dashboard')
+      const res = await fetch('http://localhost:4000/api/dashboard/books-count')
+      const data = await res.json()
+      return data
+    },
+    async countBorrwedBooks(){
+      const res = await fetch('http://localhost:4000/api/dashboard/borrowed-count')
+      const data = await res.json()
+      return data
+    },
+    async countNotReturnedBooks(){
+      const res = await fetch('http://localhost:4000/api/dashboard/not-returned-count')
       const data = await res.json()
       return data
     }
   },
   async created() {
     this.books = await this.countBooks()
+    this.borrowedBooks = await this.countBorrwedBooks()
+    this.notReturnedBooks = await this.countNotReturnedBooks()
   }
 };
 </script>
