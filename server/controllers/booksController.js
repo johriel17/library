@@ -1,20 +1,53 @@
 import pool from '../config/database.js'
 
 export const getBooks = (req, res) => {
+  const { search = '', page = 1, pageSize = 10 } = req.query;
 
-  const { search = '' } = req.query
+  const offset = (page - 1) * pageSize;
 
-  const query = 'SELECT * FROM books WHERE title LIKE ? OR author LIKE ? OR publisher LIKE ?'
+  const query = `
+    SELECT * FROM books
+    WHERE title LIKE ? OR author LIKE ? OR publisher LIKE ?
+    LIMIT ? OFFSET ?;
+  `;
 
   const searchTerm = `%${search}%`;
 
-  pool.query(query,[searchTerm, searchTerm, searchTerm], (err, results) => {
+  pool.query(query, [searchTerm, searchTerm, searchTerm, parseInt(pageSize), parseInt(offset)], (err, results) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-    res.status(200).json(results);
+
+    
+    const countQuery = `
+      SELECT COUNT(*) AS total FROM books
+      WHERE title LIKE ? OR author LIKE ? OR publisher LIKE ?
+    `;
+
+    pool.query(countQuery, [searchTerm, searchTerm, searchTerm], (err, countResult) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+
+      const totalItems = countResult[0].total;
+      const totalPages = Math.ceil(totalItems / pageSize);
+
+      
+      const response = {
+        books: results,
+        pagination: {
+          totalItems,
+          totalPages,
+          currentPage: parseInt(page),
+          pageSize: parseInt(pageSize),
+        },
+      };
+
+      res.status(200).json(response);
+    });
   });
 };
+
 
 export const getBook = (req, res) => {
   const { id } = req.params;
