@@ -10,11 +10,14 @@
     </div>
     <div class="col-md-4 d-inline">
       <div class="input-group-prepend">
+        <form @submit.prevent="$emit('search', searchTxt)">
         <input
           type="text"
           class="form-control search"
+          v-model="searchTxt"
           placeholder="SEARCH HERE"
         />
+        </form>
       </div>
       <sup style="font-color: gray">Press Enter to search</sup>
     </div>
@@ -24,6 +27,11 @@
 <script>
 export default {
   name: "ButtonGroup",
+  data(){
+    return{
+      searchTxt: ''
+    }
+  },
   props: {
     addPath: String,
     addLabel: String,
@@ -31,7 +39,7 @@ export default {
   methods: {
     reload() {
       this.$emit("reload");
-    },
+    }
   },
 };
 </script>

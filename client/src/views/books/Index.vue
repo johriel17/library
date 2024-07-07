@@ -8,7 +8,7 @@
         <div class="clearfix"></div><hr>
         <div class="col-md-12">
 
-        <ButtonGroup :addLabel="'Add Book'" :addPath="'books/add'" />
+        <ButtonGroup :addLabel="'Add Book'" :addPath="'books/add'" @search="search" />
 
         </div>
         <div class="clearfix"></div><hr>
@@ -118,10 +118,16 @@ export default {
             const res = await fetch('http://localhost:4000/api/books')
             const data = await res.json()
             return data
+        },
+        async search(searchTxt){
+          const res = await fetch(`http://localhost:4000/api/books?search=${searchTxt}`)
+          const data = await res.json()
+          this.books = data
         }
     },
     async created() {
         this.books = await this.fetchBooks()
     }
+    
 }
 </script>
