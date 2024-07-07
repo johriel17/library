@@ -1,7 +1,14 @@
 import pool from '../config/database.js'
 
 export const getBooks = (req, res) => {
-  pool.query("SELECT * FROM books", (err, results) => {
+
+  const { search = '' } = req.query
+
+  const query = 'SELECT * FROM books WHERE title LIKE ? OR author LIKE ? OR publisher LIKE ?'
+
+  const searchTerm = `%${search}%`;
+
+  pool.query(query,[searchTerm, searchTerm, searchTerm], (err, results) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
