@@ -1,6 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import BooksIndex from '../views/books/Index.vue'
+import BooksView from '../views/books/View.vue'
+import BooksAdd from '../views/books/Add.vue'
+import BooksEdit from '../views/books/Edit.vue'
 
 const routes = [
   {
@@ -8,11 +11,11 @@ const routes = [
     name: 'home',
     component: HomeView
   },
-  {
-    path: '/books',
-    name : 'books',
-    component: BooksIndex
-  },
+  //books
+  { path: '/books',component: BooksIndex},
+  { path: '/books/view/:id', component: BooksView},
+  { path: '/books/add', component: BooksAdd},
+  { path: '/books/edit/:id', component: BooksEdit},
   {
     path: '/about',
     name: 'about',
