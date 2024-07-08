@@ -39,7 +39,7 @@
           </div>
           <div class="col-md-12">
             <div class="d-flex justify-content-end gap-2">
-                <button :class="['btn btn-info btn-min', borrowedBook.is_returned ? 'disabled' : '']" @click="returnBorrowedBook(borrowedBook.id, borrowedBook.book_id)"><i class="fa fa-check"></i> RETURN </button>
+                <button :class="['btn btn-info btn-min', borrowedBook.is_returned ? 'disabled' : '']" @click="returnBook"><i class="fa fa-check"></i> RETURN </button>
                 <router-link :to="`/borrowed-books/edit/${borrowedBook.id}`" class="btn btn-primary btn-min"><i class="fa fa-edit"></i> EDIT </router-link>
                 <button class="btn btn-danger btn-min" @click="deleteBorrowedBook(borrowedBook.id)"><i class="fa fa-trash"></i> DELETE </button>
             </div>
@@ -48,17 +48,23 @@
       </div>
     </div>
   </div>
+  <ReturnBook v-if="showModal" @close-modal="closeModal" @return-book="handleReturnBook" :book="borrowedBook" />
 </div>
 </template>
 
 <script>
 import { useToast } from "vue-toastification";
-
+//modals
+import ReturnBook from '@/components/modals/ReturnBook.vue'
 export default {
     name: 'View',
+    components : {
+      ReturnBook
+    },
     data() {
         return {
-            borrowedBook : {}
+            borrowedBook : {},
+            showModal : false
         }
     },
     methods : {
@@ -84,19 +90,31 @@ export default {
             this.$router.push('/borrowed-books')
           }
         },
-        async returnBorrowedBook(id, book_id){
-            const toast = useToast()
+        returnBook(){
+          this.showModal = true
+        },
+        closeModal(){
+          this.showModal = false
+        },
+        async handleReturnBook(returnDate, id, book_id){
+          const toast = useToast()
             try{
-                const res = await fetch(`http://localhost:4000/api/borrowed-books/return/${id}/${book_id}`)
+                const res = await fetch(`http://localhost:4000/api/borrowed-books/return/${id}/${book_id}`, {
+                  method : 'PUT',
+                  headers : {
+                    'Content-Type' : 'application/json'
+                  },
+                  body : JSON.stringify({returnDate})
+                })
                 const data = await res.json()
                 if(res.ok){
+                  this.showModal = false
                     this.borrowedBook = data[0]
                     toast.success("Borrowed Book Returned Successfully!")
                 }
             }catch(error){
                 console.log(error)
             }
-
         }
     },
     async created(){

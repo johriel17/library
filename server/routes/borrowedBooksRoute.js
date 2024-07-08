@@ -10,6 +10,6 @@ router.get('/:id', getBorrowedBook)
 router.post('/', addBorrowedBook)
 router.put('/:id', updateBorrowedBook)
 router.delete('/:id', deleteBorrowedBook)
-router.get('/return/:id/:book_id', returnBook)
+router.put('/return/:id/:book_id', returnBook)
 
 export default router

@@ -179,11 +179,12 @@ export const deleteBorrowedBook = (req, res) => {
 
 export const returnBook = (req, res) => {
     const { id, book_id } = req.params;
-  
+    const {returnDate} = req.body
+
     const date = new Date();
     pool.query(
       "UPDATE borrowed_books SET is_returned = ?, returned_date = ?, modified = ? WHERE id = ?",
-      [true, date, date, id],
+      [true, returnDate, date, id],
       (err, results) => {
         if (err) {
           return res.status(500).json({ error: err.message });
