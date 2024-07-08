@@ -40,6 +40,7 @@
           <div class="col-md-12">
             <div class="d-flex justify-content-end gap-2">
                 <button :class="['btn btn-info btn-min', borrowedBook.is_returned ? 'disabled' : '']" @click="returnBook"><i class="fa fa-check"></i> RETURN </button>
+                <button :class="['btn btn-info btn-min', borrowedBook.is_returned ? 'disabled' : '']" @click="notify"><i class="fa-regular fa-envelope"></i> NOTIFY </button>
                 <router-link :to="`/borrowed-books/edit/${borrowedBook.id}`" class="btn btn-primary btn-min"><i class="fa fa-edit"></i> EDIT </router-link>
                 <button class="btn btn-danger btn-min" @click="deleteBorrowedBook(borrowedBook.id)"><i class="fa fa-trash"></i> DELETE </button>
             </div>
@@ -115,6 +116,11 @@ export default {
             }catch(error){
                 console.log(error)
             }
+        },
+        notify(){
+          const toast = useToast()
+
+          toast.success("Email sent!")
         }
     },
     async created(){
