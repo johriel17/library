@@ -1,4 +1,5 @@
 import pool from '../config/database.js'
+import { sendEmailNotification } from '../util/emailer.js'
 
 export const getBorrowedBooks = (req, res) => {
   const { search = '', page = 1, pageSize = 10 } = req.query;
@@ -81,7 +82,7 @@ export const getBorrowedBook = (req, res) => {
 };
 
 export const addBorrowedBook = async (req, res) => {
-  const { selectedBook, borrowedBy, dueDate} = req.body;
+  const { selectedBook, borrowedBy, dueDate, borrowerEmail} = req.body;
 
   const errors = {}
 
@@ -94,6 +95,9 @@ export const addBorrowedBook = async (req, res) => {
   if (!dueDate) {
     errors.dueDate = "dueDate is required";
   }
+  if (!borrowerEmail) {
+    errors.borrowerEmail = "borrowerEmail is required";
+  }
 
   if (Object.keys(errors).length > 0) {
     return res.status(400).json({ error: "Please fill out all the fields", errors });
@@ -102,8 +106,8 @@ export const addBorrowedBook = async (req, res) => {
   const date = new Date();
 
   pool.query(
-    "INSERT INTO borrowed_books (book_id, borrowed_by, due_date, created, modified) VALUES (?, ?, ?, ?, ?)",
-    [selectedBook, borrowedBy, dueDate, date, date],
+    "INSERT INTO borrowed_books (book_id, borrowed_by, borrower_email, due_date, created, modified) VALUES (?, ?, ?, ?, ?, ?)",
+    [selectedBook, borrowedBy, borrowerEmail, dueDate, date, date],
     (err, results) => {
       if (err) {
         return res.status(500).json({ error: err.message });
@@ -126,7 +130,7 @@ export const addBorrowedBook = async (req, res) => {
 
 export const updateBorrowedBook = (req, res) => {
   const { id } = req.params;
-  const { selectedBook, borrowedBy, dueDate} = req.body;
+  const { selectedBook, borrowedBy, borrowerEmail, dueDate} = req.body;
 
   const errors = {}
 
@@ -139,7 +143,9 @@ export const updateBorrowedBook = (req, res) => {
   if (!dueDate) {
     errors.dueDate = "dueDate is required";
   }
-
+  if (!borrowerEmail) {
+    errors.borrowerEmail = "borrowerEmail is required";
+  }
 
   if (Object.keys(errors).length > 0) {
     return res.status(400).json({ error: "Please fill out all the fields", errors });
@@ -148,8 +154,8 @@ export const updateBorrowedBook = (req, res) => {
   const date = new Date()
 
   pool.query(
-    "UPDATE borrowed_books SET book_id = ?, borrowed_by = ?, due_date = ?, modified = ? WHERE id = ?",
-    [selectedBook, borrowedBy, dueDate, date, id],
+    "UPDATE borrowed_books SET book_id = ?, borrowed_by = ?, borrower_email = ?, due_date = ?, modified = ? WHERE id = ?",
+    [selectedBook, borrowedBy, borrowerEmail, dueDate, date, id],
     (err, results) => {
       if (err) {
         return res.status(500).json({ error: err.message });
@@ -227,5 +233,19 @@ export const returnBook = (req, res) => {
       }
     );
   };
+
+export const notify = async (req,res) => {
+  
+  const {dueDate, email} = req.query
+
+   sendEmailNotification(
+    email,
+    'Book Return',
+    `Please return it by the due date: ${dueDate}.`
+  );
+
+
+  res.status(200).json({message : "Email Sent!"});
+}
   
 

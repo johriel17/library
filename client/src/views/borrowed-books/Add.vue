@@ -26,6 +26,13 @@
             </div>
             <div class="col-md-6">
               <div class="form-group">
+                <label> EMAIL <i class="required">*</i></label>
+                <input type="text" autocomplete="off" v-model="borrowerEmail" name="borrowed_by" :class="['form-control', errors && errors.borrowerEmail ? 'border-danger' : '']">
+                <span v-show="errors.borrowerEmail" class="text-danger">{{ errors.borrowerEmail }}</span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
                 <label> DUE DATE <i class="required">*</i></label>
                 <VueDatePicker v-model="dueDate" :class="['form-control', errors && errors.dueDate ? 'border-danger' : '']" />
                 <span v-show="errors.dueDate" class="text-danger">{{ errors.dueDate }}</span>
@@ -59,6 +66,7 @@ export default {
         return {
             selectedBook : '',
             borrowedBy : '',
+            borrowerEmail: '',
             dueDate : null,
             //error handling
             errorMessage : '',
@@ -74,6 +82,7 @@ export default {
             const borrowedBookData = {
                 selectedBook: this.selectedBook,
                 borrowedBy: this.borrowedBy,
+                borrowerEmail: this.borrowerEmail,
                 dueDate: this.dueDate,
             };
             

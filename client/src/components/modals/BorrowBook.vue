@@ -20,6 +20,12 @@
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
+                                        <label> EMAIL <i class="required">*</i></label>
+                                        <input type="text" autocomplete="off" v-model="borrowerEmail" required name="borrowerEmail" class="form-control" >
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
                                         <label> DUE DATE <i class="required">*</i></label>
                                         <VueDatePicker  v-model="dueDate" class="form-control" />
                                         <span v-show="error" class="text-danger">{{ error }}</span>
@@ -54,6 +60,7 @@ export default {
     data() {
         return {
             borrowedBy : '',
+            borrowerEmail : '',
             dueDate : null,
             error: ''
         }
@@ -72,7 +79,8 @@ export default {
             const data = {
                 book_id : this.book.id,
                 borrowedBy : this.borrowedBy,
-                dueDate : this.dueDate
+                dueDate : this.dueDate,
+                borrowerEmail : this.borrowerEmail
             }
 
             this.$emit('borrow-book', data)

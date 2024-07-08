@@ -19,6 +19,10 @@
                   <td class="italic">{{borrowedBook.borrowed_by}}</td>
                 </tr>
                 <tr>
+                  <th class="text-end"> BORRWER EMAIL : </th>
+                  <td class="italic">{{borrowedBook.borrower_email}}</td>
+                </tr>
+                <tr>
                   <th class="text-end"> DUE DATE : </th>
                   <td class="italic">{{borrowedBook.due_date}}</td>
                 </tr>
@@ -117,10 +121,12 @@ export default {
                 console.log(error)
             }
         },
-        notify(){
+        async notify(){
           const toast = useToast()
-
-          toast.success("Email sent!")
+          const res = await fetch(`http://localhost:4000/api/borrowed-books/notify?dueDate=${this.borrowedBook.due_date}&email=${this.borrowedBook.borrower_email}`)
+          if(res.ok){
+            toast.success("Email sent!")
+          }
         }
     },
     async created(){

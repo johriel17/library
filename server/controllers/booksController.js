@@ -172,13 +172,13 @@ export const deleteBook = (req, res) => {
 };
 
 export const borrowBook = async (req, res) => {
-  const { book_id, borrowedBy, dueDate} = req.body;
+  const { book_id, borrowedBy, dueDate, borrowerEmail} = req.body;
 
   const date = new Date();
 
   pool.query(
-    "INSERT INTO borrowed_books (book_id, borrowed_by, due_date, created, modified) VALUES (?, ?, ?, ?, ?)",
-    [book_id, borrowedBy, dueDate, date, date],
+    "INSERT INTO borrowed_books (book_id, borrowed_by, due_date, borrower_email, created, modified) VALUES (?, ?, ?, ?, ?, ?)",
+    [book_id, borrowedBy, dueDate, borrowerEmail, date, date],
     (err, results) => {
       if (err) {
         return res.status(500).json({ error: err.message });
