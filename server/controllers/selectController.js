@@ -2,7 +2,7 @@ import pool from '../config/database.js'
 
 
 export const selectBook = (req,res) => {
-    const query = 'SELECT * FROM books';
+    const query = 'SELECT * FROM books WHERE copies > 0 AND copies - borrowed_copies > 0';
 
     pool.query(query, (err, results) => {
         if (err) {

@@ -170,3 +170,31 @@ export const deleteBook = (req, res) => {
   });
 };
 
+export const borrowBook = async (req, res) => {
+  const { book_id, borrowedBy, dueDate} = req.body;
+
+  const date = new Date();
+
+  pool.query(
+    "INSERT INTO borrowed_books (book_id, borrowed_by, due_date, created, modified) VALUES (?, ?, ?, ?, ?)",
+    [book_id, borrowedBy, dueDate, date, date],
+    (err, results) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      
+      pool.query(
+        "UPDATE books SET borrowed_copies = borrowed_copies + 1 WHERE id = ?",
+        [book_id],
+        (err) => {
+          if (err) {
+            return res.status(500).json({ error: err.message });
+          }
+
+          res.status(201).json({ id: results.insertId, book_id, borrowedBy, dueDate });
+        }
+      );
+    }
+  );
+};
+

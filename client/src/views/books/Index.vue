@@ -24,6 +24,7 @@
                     <th scope="col">Publisher</th>
                     <th class="text-center" scope="col">Year</th>
                     <th class="text-center" scope="col">Copies</th>
+                    <th class="text-center" scope="col">Borrowed Copies</th>
                     <th class="text-center" scope="col">Actions</th>
                 </tr>
             </thead>
@@ -36,6 +37,7 @@
                   <td>{{ book.publisher }}</td>
                   <td class="text-center">{{ book.year }}</td>
                   <td class="text-center">{{ book.copies }}</td>
+                  <td class="text-center">{{ book.borrowed_copies }}</td>
                   <td class="text-center">
                     <div class="btn-group btn-group-xs">
                       <router-link

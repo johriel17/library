@@ -107,7 +107,18 @@ export const addBorrowedBook = async (req, res) => {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
-      res.status(201).json({ id: results.insertId, selectedBook, borrowedBy, dueDate });
+
+      pool.query(
+        "UPDATE books SET borrowed_copies = borrowed_copies + 1 WHERE id = ?",
+        [selectedBook],
+        (err) => {
+          if (err) {
+            return res.status(500).json({ error: err.message });
+          }
+
+          res.status(201).json({ id: results.insertId, selectedBook, borrowedBy, dueDate });
+        }
+      );
     }
   );
 };
@@ -167,7 +178,7 @@ export const deleteBorrowedBook = (req, res) => {
 };
 
 export const returnBook = (req, res) => {
-    const { id } = req.params;
+    const { id, book_id } = req.params;
   
     const date = new Date();
     pool.query(
@@ -192,12 +203,23 @@ export const returnBook = (req, res) => {
               return res.status(404).json({ error: "No such borrowed book" });
             }
 
-            selectResults.forEach(result => {
-                result.due_date = new Date(result.due_date).toLocaleDateString('en-US');
-                result.returned_date = new Date(result.returned_date).toLocaleDateString('en-US');
-              });
-  
-            res.status(200).json(selectResults);
+            pool.query(
+              "UPDATE books SET borrowed_copies = borrowed_copies - 1 WHERE id = ?",
+              [book_id],
+              (err) => {
+                if (err) {
+                  return res.status(500).json({ error: err.message });
+                }
+      
+                selectResults.forEach(result => {
+                  result.due_date = new Date(result.due_date).toLocaleDateString('en-US');
+                  result.returned_date = new Date(result.returned_date).toLocaleDateString('en-US');
+                });
+    
+              res.status(200).json(selectResults);
+              }
+            );
+
           }
         );
       }

@@ -39,7 +39,7 @@
           </div>
           <div class="col-md-12">
             <div class="d-flex justify-content-end gap-2">
-                <button :class="['btn btn-info btn-min', borrowedBook.is_returned ? 'disabled' : '']" @click="returnBorrowedBook(borrowedBook.id)"><i class="fa fa-check"></i> RETURN </button>
+                <button :class="['btn btn-info btn-min', borrowedBook.is_returned ? 'disabled' : '']" @click="returnBorrowedBook(borrowedBook.id, borrowedBook.book_id)"><i class="fa fa-check"></i> RETURN </button>
                 <router-link :to="`/borrowed-books/edit/${borrowedBook.id}`" class="btn btn-primary btn-min"><i class="fa fa-edit"></i> EDIT </router-link>
                 <button class="btn btn-danger btn-min" @click="deleteBorrowedBook(borrowedBook.id)"><i class="fa fa-trash"></i> DELETE </button>
             </div>
@@ -84,10 +84,10 @@ export default {
             this.$router.push('/borrowed-books')
           }
         },
-        async returnBorrowedBook(id){
+        async returnBorrowedBook(id, book_id){
             const toast = useToast()
             try{
-                const res = await fetch(`http://localhost:4000/api/borrowed-books/return/${id}`)
+                const res = await fetch(`http://localhost:4000/api/borrowed-books/return/${id}/${book_id}`)
                 const data = await res.json()
                 if(res.ok){
                     this.borrowedBook = data[0]
