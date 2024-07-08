@@ -49,7 +49,7 @@
             <div class="d-flex justify-content-end gap-2">
               <button :class="['btn btn-info btn-min', book.copies - book.borrowed_copies <= 0 ? 'disabled' : '']" @click="borrowBook"><i class="fa fa-book"></i> BORROW </button>
                 <router-link :to="`/books/edit/${book.id}`" class="btn btn-primary btn-min"><i class="fa fa-edit"></i> EDIT </router-link>
-                <button class="btn btn-danger btn-min" @click="deleteBook(book.id)"><i class="fa fa-trash"></i> DELETE </button>
+                <button class="btn btn-danger btn-min" @click="deleteBook(book)"><i class="fa fa-trash"></i> DELETE </button>
             </div>
           </div>
         </div>
@@ -57,6 +57,7 @@
     </div>
   </div>
   <BorrowBook v-if="showModal" @close-modal="closeModal" @borrow-book="handleBorrowBook" :book="book" />
+  <ConfirmationModal v-if="showDeleteModal" @close-modal="closeDeleteModal" :title="modalTitle" :body="modalBody" @confirm="onConfirm" />
 </div>
 </template>
 
@@ -64,16 +65,20 @@
 import { useToast } from "vue-toastification";
 //modals
 import BorrowBook from "@/components/modals/BorrowBook.vue"
+import ConfirmationModal from '@/components/modals/ConfirmationModal.vue'
 
 export default {
     name: 'View',
     components : {
-      BorrowBook
+      BorrowBook,
+      ConfirmationModal
     },
     data() {
         return {
             book : {},
-            showModal : false
+            showModal : false,
+            showDeleteModal : false,
+            bookToDelete : {}
         }
     },
     methods : {
@@ -88,16 +93,22 @@ export default {
             }
             
         },
-        async deleteBook(id){
-          const toast = useToast()
-          if(confirm('Are you sure?')){
-
-          const res = await fetch(`http://localhost:4000/api/books/${id}`, {
+        async deleteBook(book){
+          this.showDeleteModal = true
+          this.modalTitle = `Delete Borrowed Book`
+          this.modalBody = `Are you sure you want to delete ${book.title}?`
+          this.bookToDelete = book
+        },
+        async onConfirm(){
+          const toast = useToast();
+          this.showModal = false
+          await fetch(`http://localhost:4000/api/books/${this.bookToDelete.id}`, {
             method: 'DELETE',
           })
-            toast.warning('Book deleted successfully!')
-            this.$router.push('/books')
-          }
+
+          toast.warning("Book deleted successfully!");
+          this.$router.push('/books')
+              
         },
          borrowBook(){
           this.showModal = true

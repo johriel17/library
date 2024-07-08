@@ -46,7 +46,7 @@
                 <button :class="['btn btn-info btn-min', borrowedBook.is_returned ? 'disabled' : '']" @click="returnBook"><i class="fa fa-check"></i> RETURN </button>
                 <button :class="['btn btn-info btn-min', borrowedBook.is_returned ? 'disabled' : '']" @click="notify"><i class="fa-regular fa-envelope"></i> NOTIFY </button>
                 <router-link :to="`/borrowed-books/edit/${borrowedBook.id}`" class="btn btn-primary btn-min"><i class="fa fa-edit"></i> EDIT </router-link>
-                <button class="btn btn-danger btn-min" @click="deleteBorrowedBook(borrowedBook.id)"><i class="fa fa-trash"></i> DELETE </button>
+                <button class="btn btn-danger btn-min" @click="deleteBorrowedBook(borrowedBook)"><i class="fa fa-trash"></i> DELETE </button>
             </div>
           </div>
         </div>
@@ -54,6 +54,7 @@
     </div>
   </div>
   <ReturnBook v-if="showModal" @close-modal="closeModal" @return-book="handleReturnBook" :book="borrowedBook" />
+  <ConfirmationModal v-if="showDeleteModal" @close-modal="closeDeleteModal" :title="modalTitle" :body="modalBody" @confirm="onConfirm" />
 </div>
 </template>
 
@@ -61,15 +62,19 @@
 import { useToast } from "vue-toastification";
 //modals
 import ReturnBook from '@/components/modals/ReturnBook.vue'
+import ConfirmationModal from '@/components/modals/ConfirmationModal.vue'
 export default {
     name: 'View',
     components : {
-      ReturnBook
+      ReturnBook,
+      ConfirmationModal
     },
     data() {
         return {
             borrowedBook : {},
-            showModal : false
+            showModal : false,
+            showDeleteModal : false,
+            borrowedBookToDelete : {}
         }
     },
     methods : {
@@ -84,16 +89,37 @@ export default {
             }
             
         },
-        async deleteBorrowedBook(id){
-          const toast = useToast()
-          if(confirm('Are you sure?')){
+        // async deleteBorrowedBook(id){
 
-          const res = await fetch(`http://localhost:4000/api/borrowed-books/${id}`, {
+        //   const toast = useToast()
+        //   if(confirm('Are you sure?')){
+
+        //   const res = await fetch(`http://localhost:4000/api/borrowed-books/${id}`, {
+        //     method: 'DELETE',
+        //   })
+        //     toast.warning('Book deleted successfully!')
+        //     this.$router.push('/borrowed-books')
+        //   }
+        // },
+        closeDeleteModal(){
+          this.showDeleteModal = false
+        },
+        async deleteBorrowedBook(borrowedBook){
+          this.showDeleteModal = true
+          this.modalTitle = `Delete Borrowed Book`
+          this.modalBody = `Are you sure you want to delete ${borrowedBook.title}?`
+          this.borrowedBookToDelete = borrowedBook
+        },
+        async onConfirm(){
+          const toast = useToast();
+          this.showModal = false
+          await fetch(`http://localhost:4000/api/borrowed-books/${this.borrowedBookToDelete.id}`, {
             method: 'DELETE',
           })
-            toast.warning('Book deleted successfully!')
-            this.$router.push('/borrowed-books')
-          }
+
+          toast.warning("Borrowed Book deleted successfully!");
+          this.$router.push('/borrowed-books')
+              
         },
         returnBook(){
           this.showModal = true
