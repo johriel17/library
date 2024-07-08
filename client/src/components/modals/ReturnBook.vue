@@ -38,7 +38,7 @@
 import VueDatePicker from 'vue3-datepicker'
 
 export default {
-    name : 'BorrowBook',
+    name : 'ReturnBook',
     components : {
         VueDatePicker
     },
