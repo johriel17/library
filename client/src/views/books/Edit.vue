@@ -3,13 +3,13 @@
   <div class="col-lg-12 mt-3">
     <div class="card">
       <div class="card-body">
-        <div class="header-title">Edit BOOK</div>
+        <h4 class="header-title">EDIT BOOK</h4>
         <div class="clearfix"></div><hr>
         <form id="form">
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
-                <label> BOOOK NUMBER <i class="required">*</i></label>
+                <label> BOOK NUMBER <i class="required">*</i></label>
                 <input type="text" autocomplete="off" v-model="bookNumber" name="bookNumber" :class="['form-control', errors && errors.bookNumber ? 'border-danger' : '']" >
                 <span v-show="errors.bookNumber" class="text-danger">{{ errors.bookNumber }}</span>
               </div>

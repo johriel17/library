@@ -3,7 +3,7 @@
   <div class="col-lg-12 mt-3">
     <div class="card">
       <div class="card-body">
-        <div class="header-title">BORROW BOOK</div>
+        <h4 class="header-title">BORROW BOOK</h4>
         <div class="clearfix"></div><hr>
         <form id="form">
           <div class="row">
