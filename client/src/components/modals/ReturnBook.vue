@@ -24,7 +24,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" @click="closeModal" class="btn btn-secondary">Close</button>
-                <button type="submit" class="btn btn-primary">Borrow</button>
+                <button type="submit" class="btn btn-primary">Return</button>
             </div>
             </form>
             </div>
