@@ -17,14 +17,14 @@
             <div class="col-md-4 col-12 mb-2 item">
               <div @click="goToBorrowedBooks" class="card bg-primary bg-gradient shadow">
                 <div class="card-body">
-                  <h5 class="card-title text-center text-light">{{borrowedBooks}} BORROWED BOOOKS</h5>
+                  <h5 class="card-title text-center text-light">{{borrowedBooks}} BORROWED BOOKS</h5>
                 </div>
               </div>
             </div>
             <div class="col-md-4 col-12 mb-2 item">
               <div @click="goToBorrowedBooks" class="card bg-primary bg-gradient shadow">
                 <div class="card-body">
-                  <h5 class="card-title text-center text-light">{{notReturnedBooks}} NOT RETURNED BOOOKS</h5>
+                  <h5 class="card-title text-center text-light">{{notReturnedBooks}} NOT RETURNED BOOKS</h5>
                 </div>
               </div>
             </div>
