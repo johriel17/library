@@ -8,6 +8,7 @@ export const getBooks = (req, res) => {
   const query = `
     SELECT * FROM books
     WHERE title LIKE ? OR author LIKE ? OR publisher LIKE ?
+    ORDER BY created DESC
     LIMIT ? OFFSET ?;
   `;
 

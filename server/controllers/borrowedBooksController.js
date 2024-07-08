@@ -10,6 +10,7 @@ export const getBorrowedBooks = (req, res) => {
     FROM borrowed_books BorrowedBooks
     JOIN books Books ON BorrowedBooks.book_id = Books.id
     WHERE BorrowedBooks.borrowed_by LIKE ?
+    ORDER BY created DESC
     LIMIT ? OFFSET ?;
   `;
 
