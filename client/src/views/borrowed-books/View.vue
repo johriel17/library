@@ -89,18 +89,6 @@ export default {
             }
             
         },
-        // async deleteBorrowedBook(id){
-
-        //   const toast = useToast()
-        //   if(confirm('Are you sure?')){
-
-        //   const res = await fetch(`http://localhost:4000/api/borrowed-books/${id}`, {
-        //     method: 'DELETE',
-        //   })
-        //     toast.warning('Book deleted successfully!')
-        //     this.$router.push('/borrowed-books')
-        //   }
-        // },
         closeDeleteModal(){
           this.showDeleteModal = false
         },
@@ -113,7 +101,7 @@ export default {
         async onConfirm(){
           const toast = useToast();
           this.showModal = false
-          await fetch(`http://localhost:4000/api/borrowed-books/${this.borrowedBookToDelete.id}`, {
+          await fetch(`http://localhost:4000/api/borrowed-books/${this.borrowedBookToDelete.id}/${this.borrowedBookToDelete.book_id}`, {
             method: 'DELETE',
           })
 

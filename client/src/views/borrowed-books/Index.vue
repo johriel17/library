@@ -135,7 +135,7 @@ export default {
         async onConfirm(){
           const toast = useToast();
           this.showModal = false
-          await fetch(`http://localhost:4000/api/borrowed-books/${this.bookToDelete.id}`, {
+          await fetch(`http://localhost:4000/api/borrowed-books/${this.bookToDelete.id}/${this.bookToDelete.book_id}`, {
             method: 'DELETE',
           })
 

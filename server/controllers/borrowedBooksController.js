@@ -171,18 +171,45 @@ export const updateBorrowedBook = (req, res) => {
 };
 
 export const deleteBorrowedBook = (req, res) => {
-  const { id } = req.params;
+  const { id, book_id } = req.params;
 
-  pool.query("DELETE FROM borrowed_books WHERE id = ?", [id], (err, results) => {
+  // Select the borrowed book to check if it was returned
+  pool.query("SELECT * FROM borrowed_books WHERE id = ?", [id], (err, selectResult) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-    if (results.affectedRows === 0) {
-      return res.status(404).json({ error: "No such book" });
+    if (selectResult.length === 0) {
+      return res.status(404).json({ error: "No such borrowed book" });
     }
-    res.status(200).json({ message: "Book deleted" });
+
+    const borrowedBook = selectResult[0];
+
+    // Delete the borrowed book
+    pool.query("DELETE FROM borrowed_books WHERE id = ?", [id], (err, deleteResult) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      if (deleteResult.affectedRows === 0) {
+        return res.status(404).json({ error: "No such borrowed book" });
+      }
+
+      // If the book was returned, decrement the borrowed copies
+      if (!borrowedBook.is_returned) {
+        pool.query("UPDATE books SET borrowed_copies = borrowed_copies - 1 WHERE id = ?", [book_id], (err, updateResult) => {
+          if (err) {
+            return res.status(500).json({ error: err.message });
+          }
+
+          res.status(200).json({ message: "Borrowed book deleted", data: borrowedBook });
+        });
+      } else {
+        // If the book was not returned, just send the response
+        res.status(200).json({ message: "Borrowed book deleted", data: borrowedBook });
+      }
+    });
   });
 };
+
 
 export const returnBook = (req, res) => {
     const { id, book_id } = req.params;
