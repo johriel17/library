@@ -1,88 +1,87 @@
-import pool from '../config/database.js'
+import { sequelize, BorrowedBook, Book } from '../models/index.js';
+import { Op } from 'sequelize';
 import { sendEmailNotification } from '../util/emailer.js'
 
-export const getBorrowedBooks = (req, res) => {
+export const getBorrowedBooks = async (req, res) => {
   const { search = '', page = 1, pageSize = 10 } = req.query;
-
   const offset = (page - 1) * pageSize;
-
-  const query = `
-    SELECT BorrowedBooks.*, Books.title, Books.author
-    FROM borrowed_books BorrowedBooks
-    JOIN books Books ON BorrowedBooks.book_id = Books.id
-    WHERE BorrowedBooks.borrowed_by LIKE ?
-    ORDER BY created DESC
-    LIMIT ? OFFSET ?;
-  `;
-
   const searchTerm = `%${search}%`;
 
-  pool.query(query, [searchTerm, parseInt(pageSize), parseInt(offset)], (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-
-    
-    const countQuery = `
-      SELECT COUNT(*) AS total FROM borrowed_books
-      WHERE borrowed_by LIKE ?
-    `;
-
-    pool.query(countQuery, [searchTerm], (err, countResult) => {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-
-      const totalItems = countResult[0].total;
-      const totalPages = Math.ceil(totalItems / pageSize);
-
-      results.forEach(result => {
-        const dueDate = new Date(result.due_date);
-        result.due_date = dueDate.toLocaleDateString('en-US');
-        const returDate = new Date(result.returned_date);
-        result.returned_date = returDate.toLocaleDateString('en-US');
-      });
-
-      const response = {
-        borrowed_books: results,
-        pagination: {
-          totalItems,
-          totalPages,
-          currentPage: parseInt(page),
-          pageSize: parseInt(pageSize),
-        },
-      };
-
-      res.status(200).json(response);
+  try {
+    const { count, rows } = await BorrowedBook.findAndCountAll({
+      where: {
+        borrowed_by: {
+          [Op.like]: searchTerm
+        }
+      },
+      include: [{
+        model: Book,
+        attributes: ['title', 'author']
+      }],
+      order: [['created', 'DESC']],
+      limit: pageSize,
+      offset: offset
     });
-  });
+
+    const totalItems = count;
+    const totalPages = Math.ceil(totalItems / pageSize);
+
+    rows.forEach(row => {
+      row.due_date = new Date(row.due_date).toLocaleDateString('en-US');
+      if (row.returned_date) {
+        row.returned_date = new Date(row.returned_date).toLocaleDateString('en-US');
+      }
+    });
+
+    const response = {
+      borrowed_books: rows,
+      pagination: {
+        totalItems,
+        totalPages,
+        currentPage: parseInt(page),
+        pageSize: parseInt(pageSize),
+      },
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error('Error fetching borrowed books:', error);
+    res.status(500).json({ error: 'Error fetching borrowed books' });
+  }
 };
 
 
-export const getBorrowedBook = (req, res) => {
+export const getBorrowedBook = async (req, res) => {
   const { id } = req.params;
 
-  pool.query(`SELECT BorrowedBooks.*, Books.title FROM borrowed_books BorrowedBooks JOIN books Books ON BorrowedBooks.book_id = Books.id WHERE BorrowedBooks.id = ${id}`, (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-
-    results.forEach(result => {
-        const dueDate = new Date(result.due_date);
-        result.due_date = dueDate.toLocaleDateString('en-US');
-        const returDate = new Date(result.returned_date);
-        result.returned_date = returDate.toLocaleDateString('en-US');
+  try {
+    const borrowedBook = await BorrowedBook.findOne({
+      where: { id },
+      include: [{
+        model: Book,
+        attributes: ['title']
+      }]
     });
 
-    if (results.length === 0) {
-      return res.status(404).json({ error: "No such Borrowd Book" });
+    if (!borrowedBook) {
+      return res.status(404).json({ error: "No such Borrowed Book" });
     }
-    res.status(200).json(results);
-  });
+
+    borrowedBook.due_date = new Date(borrowedBook.due_date).toLocaleDateString('en-US');
+    if (borrowedBook.returned_date) {
+      borrowedBook.returned_date = new Date(borrowedBook.returned_date).toLocaleDateString('en-US');
+    }
+
+    res.status(200).json(borrowedBook);
+  } catch (error) {
+    console.error('Error fetching borrowed book:', error);
+    res.status(500).json({ error: 'Error fetching borrowed book' });
+  }
 };
+
 
 export const addBorrowedBook = async (req, res) => {
-  const { selectedBook, borrowedBy, dueDate, borrowerEmail} = req.body;
+  const { selectedBook, borrowedBy, dueDate, borrowerEmail } = req.body;
 
   const errors = {}
 
@@ -90,47 +89,44 @@ export const addBorrowedBook = async (req, res) => {
     errors.selectedBook = "select a book";
   }
   if (!borrowedBy) {
-    errors.borrowedBy = "borrorwedBy is required";
+    errors.borrowedBy = "borrorwed by is required";
   }
   if (!dueDate) {
-    errors.dueDate = "dueDate is required";
+    errors.dueDate = "due date is required";
   }
   if (!borrowerEmail) {
-    errors.borrowerEmail = "borrowerEmail is required";
+    errors.borrowerEmail = "borrower email is required";
   }
 
   if (Object.keys(errors).length > 0) {
     return res.status(400).json({ error: "Please fill out all the fields", errors });
   }
 
-  const date = new Date();
+  try {
+    const date = new Date();
 
-  pool.query(
-    "INSERT INTO borrowed_books (book_id, borrowed_by, borrower_email, due_date, created, modified) VALUES (?, ?, ?, ?, ?, ?)",
-    [selectedBook, borrowedBy, borrowerEmail, dueDate, date, date],
-    (err, results) => {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
+    const newBorrowedBook = await BorrowedBook.create({
+      book_id: selectedBook,
+      borrowed_by: borrowedBy,
+      borrower_email: borrowerEmail,
+      due_date: dueDate,
+      created: date,
+      modified: date
+    });
 
-      pool.query(
-        "UPDATE books SET borrowed_copies = borrowed_copies + 1 WHERE id = ?",
-        [selectedBook],
-        (err) => {
-          if (err) {
-            return res.status(500).json({ error: err.message });
-          }
+    await Book.increment('borrowed_copies', { where: { id: selectedBook } });
 
-          res.status(201).json({ id: results.insertId, selectedBook, borrowedBy, dueDate });
-        }
-      );
-    }
-  );
+    res.status(201).json(newBorrowedBook);
+  } catch (error) {
+    console.error('Error adding borrowed book:', error);
+    res.status(500).json({ error: 'Error adding borrowed book' });
+  }
 };
 
-export const updateBorrowedBook = (req, res) => {
+
+export const updateBorrowedBook = async (req, res) => {
   const { id } = req.params;
-  const { selectedBook, borrowedBy, borrowerEmail, dueDate} = req.body;
+  const { selectedBook, borrowedBy, borrowerEmail, dueDate } = req.body;
 
   const errors = {}
 
@@ -138,128 +134,106 @@ export const updateBorrowedBook = (req, res) => {
     errors.selectedBook = "select a book";
   }
   if (!borrowedBy) {
-    errors.borrowedBy = "borrorwedBy is required";
+    errors.borrowedBy = "borrorwed by is required";
   }
   if (!dueDate) {
-    errors.dueDate = "dueDate is required";
+    errors.dueDate = "due date is required";
   }
   if (!borrowerEmail) {
-    errors.borrowerEmail = "borrowerEmail is required";
+    errors.borrowerEmail = "borrower email is required";
   }
 
   if (Object.keys(errors).length > 0) {
     return res.status(400).json({ error: "Please fill out all the fields", errors });
   }
 
-  const date = new Date()
+  try {
+    const date = new Date();
 
-  pool.query(
-    "UPDATE borrowed_books SET book_id = ?, borrowed_by = ?, borrower_email = ?, due_date = ?, modified = ? WHERE id = ?",
-    [selectedBook, borrowedBy, borrowerEmail, dueDate, date, id],
-    (err, results) => {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-      if (results.affectedRows === 0) {
-        return res.status(404).json({ error: "No such borrowed book" });
-      }
-      res
-        .status(200)
-        .json({ message: "Book updated", id, selectedBook, borrowedBy, dueDate });
-    }
-  );
-};
+    const [updatedRowsCount, updatedRows] = await BorrowedBook.update({
+      book_id: selectedBook,
+      borrowed_by: borrowedBy,
+      borrower_email: borrowerEmail,
+      due_date: dueDate,
+      modified: date
+    }, {
+      where: { id },
+      returning: true
+    });
 
-export const deleteBorrowedBook = (req, res) => {
-  const { id, book_id } = req.params;
-
-  // Select the borrowed book to check if it was returned
-  pool.query("SELECT * FROM borrowed_books WHERE id = ?", [id], (err, selectResult) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    if (selectResult.length === 0) {
+    if (updatedRowsCount === 0) {
       return res.status(404).json({ error: "No such borrowed book" });
     }
 
-    const borrowedBook = selectResult[0];
-
-    // Delete the borrowed book
-    pool.query("DELETE FROM borrowed_books WHERE id = ?", [id], (err, deleteResult) => {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-      if (deleteResult.affectedRows === 0) {
-        return res.status(404).json({ error: "No such borrowed book" });
-      }
-
-      // If the book was returned, decrement the borrowed copies
-      if (!borrowedBook.is_returned) {
-        pool.query("UPDATE books SET borrowed_copies = borrowed_copies - 1 WHERE id = ?", [book_id], (err, updateResult) => {
-          if (err) {
-            return res.status(500).json({ error: err.message });
-          }
-
-          res.status(200).json({ message: "Borrowed book deleted", data: borrowedBook });
-        });
-      } else {
-        // If the book was not returned, just send the response
-        res.status(200).json({ message: "Borrowed book deleted", data: borrowedBook });
-      }
-    });
-  });
+    res.status(200).json(updatedRows[0]);
+  } catch (error) {
+    console.error('Error updating borrowed book:', error);
+    res.status(500).json({ error: 'Error updating borrowed book' });
+  }
 };
 
 
-export const returnBook = (req, res) => {
-    const { id, book_id } = req.params;
-    const {returnDate} = req.body
+export const deleteBorrowedBook = async (req, res) => {
+  const { id, book_id } = req.params;
 
+  try {
+    const borrowedBook = await BorrowedBook.findByPk(id);
+
+    if (!borrowedBook) {
+      return res.status(404).json({ error: "No such borrowed book" });
+    }
+
+    await borrowedBook.destroy();
+
+    if (!borrowedBook.is_returned) {
+      await Book.decrement('borrowed_copies', { where: { id: book_id } });
+    }
+
+    res.status(200).json({ message: "Borrowed book deleted", data: borrowedBook });
+  } catch (error) {
+    console.error('Error deleting borrowed book:', error);
+    res.status(500).json({ error: 'Error deleting borrowed book' });
+  }
+};
+
+
+export const returnBook = async (req, res) => {
+  const { id, book_id } = req.params;
+  const { returnDate } = req.body;
+
+  try {
     const date = new Date();
-    pool.query(
-      "UPDATE borrowed_books SET is_returned = ?, returned_date = ?, modified = ? WHERE id = ?",
-      [true, returnDate, date, id],
-      (err, results) => {
-        if (err) {
-          return res.status(500).json({ error: err.message });
-        }
-        if (results.affectedRows === 0) {
-          return res.status(404).json({ error: "No such borrowed book" });
-        }
-  
-        pool.query(
-          `SELECT BorrowedBooks.*, Books.title FROM borrowed_books BorrowedBooks JOIN books Books ON BorrowedBooks.book_id = Books.id WHERE BorrowedBooks.id = ${id}`,
-          (err, selectResults) => {
-            if (err) {
-              return res.status(500).json({ error: err.message });
-            }
-  
-            if (selectResults.length === 0) {
-              return res.status(404).json({ error: "No such borrowed book" });
-            }
 
-            pool.query(
-              "UPDATE books SET borrowed_copies = borrowed_copies - 1 WHERE id = ?",
-              [book_id],
-              (err) => {
-                if (err) {
-                  return res.status(500).json({ error: err.message });
-                }
-      
-                selectResults.forEach(result => {
-                  result.due_date = new Date(result.due_date).toLocaleDateString('en-US');
-                  result.returned_date = new Date(result.returned_date).toLocaleDateString('en-US');
-                });
-    
-              res.status(200).json(selectResults);
-              }
-            );
+    const [updatedRowsCount] = await BorrowedBook.update({
+      is_returned: true,
+      returned_date: returnDate,
+      modified: date
+    }, {
+      where: { id },
+      returning: true
+    });
 
-          }
-        );
-      }
-    );
-  };
+    if (updatedRowsCount === 0) {
+      return res.status(404).json({ error: "No such borrowed book" });
+    }
+
+    await Book.decrement('borrowed_copies', { where: { id: book_id } });
+
+    const updatedRow = await BorrowedBook.findOne({
+      where: { id },
+      include: [{
+        model: Book,
+        attributes: ['title']
+      }]
+    });
+
+    res.status(200).json(updatedRow);
+  } catch (error) {
+    console.error('Error returning borrowed book:', error);
+    res.status(500).json({ error: 'Error returning borrowed book' });
+  }
+};
+
 
 export const notify = async (req,res) => {
   
