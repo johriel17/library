@@ -31,7 +31,7 @@
                   <th class="text-center" scope="row">{{ (pagination.currentPage - 1 ) * 10 + index + 1 }}</th>
                   <td>{{ book.Book.title }}</td>
                   <td>{{ book.borrowed_by }}</td>
-                  <td>{{ book.due_date }}</td>
+                  <td>{{ $filters.formatDate(book.due_date) }}</td>
                   <td>{{ book.is_returned ? 'Yes' : 'No' }}</td>
                   <td class="text-center">{{ book.is_returned ? book.returned_date : ''}}</td>
                   <td class="text-center">
