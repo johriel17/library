@@ -11,7 +11,7 @@
               <div class="col-md-6">
                 <div class="form-group">
                   <label> BOOK <i class="required">*</i></label>
-                  <select v-model="selectedBook" class="form-control">
+                  <select disabled v-model="selectedBook" class="form-control">
                     <option value=""></option>
                     <option
                       v-for="book in books"
@@ -128,7 +128,7 @@ export default {
       const res = await fetch(`http://localhost:4000/api/borrowed-books/${id}`);
       const data = await res.json();
       if (res.ok) {
-        return data[0];
+        return data;
       } else {
         return data;
       }

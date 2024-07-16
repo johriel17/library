@@ -91,7 +91,7 @@ export default {
             const res = await fetch(`http://localhost:4000/api/books/${id}`)
             const data = await res.json()
             if(res.ok){
-                return data[0]
+                return data
             }else{
                 return data
             }

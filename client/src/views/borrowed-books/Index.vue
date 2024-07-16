@@ -29,7 +29,7 @@
             <tbody>
                 <tr :key="book.id" v-for="(book, index) in borrowedBooks">
                   <th class="text-center" scope="row">{{ (pagination.currentPage - 1 ) * 10 + index + 1 }}</th>
-                  <td>{{ book.title }}</td>
+                  <td>{{ book.Book.title }}</td>
                   <td>{{ book.borrowed_by }}</td>
                   <td>{{ book.due_date }}</td>
                   <td>{{ book.is_returned ? 'Yes' : 'No' }}</td>
@@ -126,7 +126,7 @@ export default {
         async deleteBook(book) {
           this.showModal = true
           this.modalTitle = `Delete Borrowed Book`
-          this.modalBody = `Are you sure you want to delete ${book.title}?`
+          this.modalBody = `Are you sure you want to delete ${book.Book.title}?`
           this.bookToDelete = book
         },
         closeModal(){
