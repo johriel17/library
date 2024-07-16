@@ -24,7 +24,7 @@
                 </tr>
                 <tr>
                   <th class="text-end"> DUE DATE : </th>
-                  <td class="italic">{{borrowedBook.due_date}}</td>
+                  <td class="italic">{{ $filters.formatDate(borrowedBook.due_date) }}</td>
                 </tr>
                 <tr>
                   <th class="text-end"> RETURNED : </th>
@@ -32,7 +32,7 @@
                 </tr>
                 <tr>
                   <th class="text-end"> RETURNED DATE : </th>
-                  <td class="italic">{{borrowedBook.is_returned ? borrowedBook.returned_date : ''}}</td>
+                  <td class="italic">{{borrowedBook.is_returned ? $filters.formatDate(borrowedBook.returned_date) : ''}}</td>
                 </tr>
               </table>
             </div> 

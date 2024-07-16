@@ -26,12 +26,12 @@ export const getBorrowedBooks = async (req, res) => {
     const totalItems = count;
     const totalPages = Math.ceil(totalItems / pageSize);
 
-    rows.forEach(row => {
-      row.due_date = new Date(row.due_date).toLocaleDateString('en-US');
-      if (row.returned_date) {
-        row.returned_date = new Date(row.returned_date).toLocaleDateString('en-US');
-      }
-    });
+    // rows.forEach(row => {
+    //   row.due_date = new Date(row.due_date).toLocaleDateString('en-US');
+    //   if (row.returned_date) {
+    //     row.returned_date = new Date(row.returned_date).toLocaleDateString('en-US');
+    //   }
+    // });
 
     const response = {
       borrowed_books: rows,
@@ -67,10 +67,10 @@ export const getBorrowedBook = async (req, res) => {
       return res.status(404).json({ error: "No such Borrowed Book" });
     }
 
-    borrowedBook.due_date = new Date(borrowedBook.due_date).toLocaleDateString('en-US');
-    if (borrowedBook.returned_date) {
-      borrowedBook.returned_date = new Date(borrowedBook.returned_date).toLocaleDateString('en-US');
-    }
+    // borrowedBook.due_date = new Date(borrowedBook.due_date).toLocaleDateString('en-US');
+    // if (borrowedBook.returned_date) {
+    //   borrowedBook.returned_date = new Date(borrowedBook.returned_date).toLocaleDateString('en-US');
+    // }
 
     res.status(200).json(borrowedBook);
   } catch (error) {
