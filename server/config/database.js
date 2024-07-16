@@ -1,11 +1,12 @@
-import mysql from 'mysql'
+import { Sequelize } from 'sequelize';
+import config from './config.js';
 
-const pool = mysql.createPool({
-    connectionLimit: 10,
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "library",
+const env = process.env.NODE_ENV || 'development';
+const { database, username, password, host, dialect } = config[env];
+
+const sequelize = new Sequelize(database, username, password, {
+  host,
+  dialect,
 });
 
-export default pool
+export default sequelize;

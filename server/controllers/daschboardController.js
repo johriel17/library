@@ -1,44 +1,31 @@
-import pool from '../config/database.js'
+import { Book, BorrowedBook } from '../models/index.js';
 
+export const booksCount = async (req, res) => {
+  try {
+    const count = await Book.count();
+    res.status(200).json(count);
+  } catch (error) {
+    console.error('Error counting books:', error);
+    res.status(500).json({ error: 'Error counting books' });
+  }
+};
 
-export const booksCount = (req,res) => {
-    const query = 'SELECT COUNT(*) AS count FROM books';
+export const borrowedBooksCount = async (req, res) => {
+  try {
+    const count = await BorrowedBook.count();
+    res.status(200).json(count);
+  } catch (error) {
+    console.error('Error counting borrowed books:', error);
+    res.status(500).json({ error: 'Error counting borrowed books' });
+  }
+};
 
-    let booksCount = 0
-
-    pool.query(query, (err, results) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        booksCount = results[0].count;
-        res.status(200).json(booksCount);
-    });
-}
-
-export const BorrowedBooksCount = (req,res) => {
-    const query = 'SELECT COUNT(*) AS count FROM borrowed_books';
-
-    let borrowedBooksCount = 0
-
-    pool.query(query, (err, results) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        borrowedBooksCount = results[0].count;
-        res.status(200).json(borrowedBooksCount);
-    });
-}
-
-export const notReturnedBooksCount = (req,res) => {
-    const query = 'SELECT COUNT(*) AS count FROM borrowed_books WHERE is_returned = false';
-
-    let notReturnedBooks = 0
-
-    pool.query(query, (err, results) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        notReturnedBooks = results[0].count;
-        res.status(200).json(notReturnedBooks);
-    });
-}
+export const notReturnedBooksCount = async (req, res) => {
+  try {
+    const count = await BorrowedBook.count({ where: { is_returned: false } });
+    res.status(200).json(count);
+  } catch (error) {
+    console.error('Error counting not returned books:', error);
+    res.status(500).json({ error: 'Error counting not returned books' });
+  }
+};

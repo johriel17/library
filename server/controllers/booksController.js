@@ -1,69 +1,57 @@
-import pool from '../config/database.js'
+import { sequelize, Book, BorrowedBook } from '../models/index.js'; 
+import { Op } from 'sequelize';
 
-export const getBooks = (req, res) => {
+
+export const getBooks = async (req, res) => {
   const { search = '', page = 1, pageSize = 10 } = req.query;
-
   const offset = (page - 1) * pageSize;
-
-  const query = `
-    SELECT * FROM books
-    WHERE title LIKE ? OR author LIKE ? OR publisher LIKE ?
-    ORDER BY created DESC
-    LIMIT ? OFFSET ?;
-  `;
-
   const searchTerm = `%${search}%`;
 
-  pool.query(query, [searchTerm, searchTerm, searchTerm, parseInt(pageSize), parseInt(offset)], (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-
-    
-    const countQuery = `
-      SELECT COUNT(*) AS total FROM books
-      WHERE title LIKE ? OR author LIKE ? OR publisher LIKE ?
-    `;
-
-    pool.query(countQuery, [searchTerm, searchTerm, searchTerm], (err, countResult) => {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-
-      const totalItems = countResult[0].total;
-      const totalPages = Math.ceil(totalItems / pageSize);
-
-      
-      const response = {
-        books: results,
-        pagination: {
-          totalItems,
-          totalPages,
-          currentPage: parseInt(page),
-          pageSize: parseInt(pageSize),
-        },
-      };
-
-      res.status(200).json(response);
+  try {
+    const { rows: books, count: totalItems } = await Book.findAndCountAll({
+      where: {
+        [Op.or]: [
+          { title: { [Op.like]: searchTerm } },
+          { author: { [Op.like]: searchTerm } },
+          { publisher: { [Op.like]: searchTerm } }
+        ]
+      },
+      order: [['created', 'DESC']],
+      limit: parseInt(pageSize),
+      offset: parseInt(offset)
     });
-  });
+
+    const totalPages = Math.ceil(totalItems / pageSize);
+
+    res.status(200).json({
+      books,
+      pagination: { totalItems, totalPages, currentPage: parseInt(page), pageSize: parseInt(pageSize) }
+    });
+  } catch (error) {
+    console.error('Error fetching books:', error);
+    res.status(500).json({ error: 'Error fetching books' });
+  }
 };
 
 
-export const getBook = (req, res) => {
+
+export const getBook = async (req, res) => {
   const { id } = req.params;
 
-  pool.query(`SELECT * FROM books WHERE id = ${id}`, (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
+  try {
+    const book = await Book.findByPk(id);
+
+    if (!book) {
+      return res.status(404).json({ error: 'No such book' });
     }
 
-    if (results.length === 0) {
-      return res.status(404).json({ error: "No such book" });
-    }
-    res.status(200).json(results);
-  });
+    res.status(200).json(book);
+  } catch (error) {
+    console.error('Error fetching book:', error);
+    res.status(500).json({ error: 'Error fetching book' });
+  }
 };
+
 
 export const addBook = async (req, res) => {
   const { bookNumber, title, author, publisher, year, copies } = req.body;
@@ -71,7 +59,7 @@ export const addBook = async (req, res) => {
   const errors = {}
 
   if (!bookNumber) {
-    errors.bookNumber = "bookNumber is required";
+    errors.bookNumber = "book number is required";
   }
   if (!title) {
     errors.title = "title is required";
@@ -94,21 +82,27 @@ export const addBook = async (req, res) => {
     return res.status(400).json({ error: "Please fill out all the fields", errors });
   }
 
-  const date = new Date();
+  try {
+    const newBook = await Book.create({
+      book_number: bookNumber,
+      title,
+      author,
+      publisher,
+      year,
+      copies,
+      created: new Date(),
+      modified: new Date()
+    });
 
-  pool.query(
-    "INSERT INTO books (book_number, title, author, publisher, year, copies, created, modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-    [bookNumber, title, author, publisher, year, copies, date, date],
-    (err, results) => {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-      res.status(201).json({ id: results.insertId, bookNumber, title, author, publisher, year, copies });
-    }
-  );
+    res.status(201).json(newBook);
+  } catch (error) {
+    console.error('Error adding book:', error);
+    res.status(500).json({ error: 'Error adding book' });
+  }
 };
 
-export const updateBook = (req, res) => {
+
+export const updateBook = async (req, res) => {
   const { id } = req.params;
   const { bookNumber, title, author, publisher, year, copies } = req.body;
 
@@ -138,64 +132,75 @@ export const updateBook = (req, res) => {
     return res.status(400).json({ error: "Please fill out all the fields", errors });
   }
 
-  const date = new Date()
+  try {
+    const [affectedRows] = await Book.update({
+      book_number: bookNumber,
+      title,
+      author,
+      publisher,
+      year,
+      copies,
+      modified: new Date()
+    }, {
+      where: { id },
+      returning: true // To get updated record in the response
+    });
 
-  pool.query(
-    "UPDATE books SET book_number = ?, title = ?, author = ?, publisher = ?, year = ?, copies = ?, modified = ? WHERE id = ?",
-    [bookNumber, title, author, publisher, year, copies, date, id],
-    (err, results) => {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-      if (results.affectedRows === 0) {
-        return res.status(404).json({ error: "No such book" });
-      }
-      res
-        .status(200)
-        .json({ message: "Book updated", id, bookNumber, title, author, publisher, year, copies });
+    if (affectedRows === 0) {
+      return res.status(404).json({ error: 'No such book' });
     }
-  );
+
+    const updatedBook = await Book.findByPk(id);
+    res.status(200).json(updatedBook);
+  } catch (error) {
+    console.error('Error updating book:', error);
+    res.status(500).json({ error: 'Error updating book' });
+  }
 };
 
-export const deleteBook = (req, res) => {
+
+export const deleteBook = async (req, res) => {
   const { id } = req.params;
 
-  pool.query("DELETE FROM books WHERE id = ?", [id], (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
+  try {
+    const deletedRows = await Book.destroy({ where: { id } });
+
+    if (deletedRows === 0) {
+      return res.status(404).json({ error: 'No such book' });
     }
-    if (results.affectedRows === 0) {
-      return res.status(404).json({ error: "No such book" });
-    }
-    res.status(200).json({ message: "Book deleted" });
-  });
+
+    res.status(200).json({ message: 'Book deleted' });
+  } catch (error) {
+    console.error('Error deleting book:', error);
+    res.status(500).json({ error: 'Error deleting book' });
+  }
 };
 
 export const borrowBook = async (req, res) => {
-  const { book_id, borrowedBy, dueDate, borrowerEmail} = req.body;
+  const { book_id, borrowedBy, dueDate, borrowerEmail } = req.body;
+  const transaction = await sequelize.transaction();
 
-  const date = new Date();
+  try {
+    const newBorrowedBook = await BorrowedBook.create({
+      book_id,
+      borrowed_by: borrowedBy,
+      due_date: dueDate,
+      borrower_email: borrowerEmail,
+      created: new Date(),
+      modified: new Date()
+    }, { transaction });
 
-  pool.query(
-    "INSERT INTO borrowed_books (book_id, borrowed_by, due_date, borrower_email, created, modified) VALUES (?, ?, ?, ?, ?, ?)",
-    [book_id, borrowedBy, dueDate, borrowerEmail, date, date],
-    (err, results) => {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-      
-      pool.query(
-        "UPDATE books SET borrowed_copies = borrowed_copies + 1 WHERE id = ?",
-        [book_id],
-        (err) => {
-          if (err) {
-            return res.status(500).json({ error: err.message });
-          }
+    // Update borrowed copies in books table
+    await Book.increment('borrowed_copies', { where: { id: book_id }, transaction });
 
-          res.status(201).json({ id: results.insertId, book_id, borrowedBy, dueDate });
-        }
-      );
-    }
-  );
+    await transaction.commit();
+
+    res.status(201).json(newBorrowedBook);
+  } catch (error) {
+    await transaction.rollback();
+    console.error('Error borrowing book:', error);
+    res.status(500).json({ error: 'Error borrowing book' });
+  }
 };
+
 

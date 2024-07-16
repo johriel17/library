@@ -10,11 +10,11 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label> BOOK <i class="required">*</i></label>
-                <select v-model="selectedBook" class="form-control">
+                <select v-model="selectedBook" class="form-control" :class="['form-control', errors && errors.borrowedBy ? 'border-danger' : '']">
                     <option value=""></option>
                     <option v-for="book in books" :key="book.id" :value="book.id">{{ book.val }}</option>
                 </select>
-                <span v-show="errors.book" class="text-danger">{{ errors.book }}</span>
+                <span v-show="errors.selectedBook" class="text-danger">{{ errors.selectedBook }}</span>
               </div>
             </div>
             <div class="col-md-6">

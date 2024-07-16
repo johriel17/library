@@ -1,15 +1,24 @@
-import pool from '../config/database.js'
+import { sequelize, Book } from '../models/index.js';
+import { Op } from 'sequelize';
 
-
-export const selectBook = (req,res) => {
-    const query = 'SELECT * FROM books WHERE copies > 0 AND copies - borrowed_copies > 0';
-
-    pool.query(query, (err, results) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        const data = results.map((result) => ({val : `${result.title} - ${result.author}`, id : result.id}))
-        res.status(200).json(data);
+export const selectBook = async (req, res) => {
+  try {
+    const books = await Book.findAll({
+      where: {
+        copies: { [Op.gt]: 0 },
+        borrowed_copies: { [Op.lt]: sequelize.col('copies') }
+      },
+      attributes: ['id', 'title', 'author']
     });
 
-}
+    const data = books.map(book => ({
+      id: book.id,
+      val: `${book.title} - ${book.author}`
+    }));
+
+    res.status(200).json(data);
+  } catch (error) {
+    console.error('Error selecting books:', error);
+    res.status(500).json({ error: 'Error selecting books' });
+  }
+};

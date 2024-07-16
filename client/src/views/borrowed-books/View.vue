@@ -12,7 +12,7 @@
               <table class="table table-striped">
                 <tr>
                   <th class="text-end" style="width:15%"> BOOK : </th>
-                  <td class="italic">{{borrowedBook.title}}</td>
+                  <td class="italic">{{borrowedBook.Book && borrowedBook.Book.title}}</td>
                 </tr>
                 <tr>
                   <th class="text-end"> BORRWED BY : </th>
@@ -83,7 +83,7 @@ export default {
             const data = await res.json()
 
             if(res.ok){
-                return data[0]
+                return data
             }else{
                 return data
             }
@@ -128,7 +128,7 @@ export default {
                 const data = await res.json()
                 if(res.ok){
                   this.showModal = false
-                    this.borrowedBook = data[0]
+                    this.borrowedBook = data
                     toast.success("Borrowed Book Returned Successfully!")
                 }
             }catch(error){

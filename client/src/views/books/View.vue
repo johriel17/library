@@ -87,7 +87,7 @@ export default {
             const data = await res.json()
 
             if(res.ok){
-                return data[0]
+                return data
             }else{
                 return data
             }
