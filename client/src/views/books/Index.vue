@@ -109,20 +109,20 @@ export default {
     },
     methods : {
         async fetchBooks() {
-            const res = await fetch('http://localhost:4000/api/books')
+            const res = await fetch(`${process.env.VUE_APP_BASE_URL}/api/books`)
             const data = await res.json()
             this.books = data.books
             this.pagination = data.pagination
         },
         async search(searchTxt){
           this.searchTxt = searchTxt
-          const res = await fetch(`http://localhost:4000/api/books?search=${searchTxt}`)
+          const res = await fetch(`${process.env.VUE_APP_BASE_URL}/api/books?search=${searchTxt}`)
           const data = await res.json()
           this.books = data.books
           this.pagination = data.pagination
         },
         async changePage(page){
-          const res = await fetch(`http://localhost:4000/api/books?search=${this.searchTxt}&page=${page}`)
+          const res = await fetch(`${process.env.VUE_APP_BASE_URL}/api/books?search=${this.searchTxt}&page=${page}`)
           const data = await res.json()
           this.books = data.books
           this.pagination = data.pagination
@@ -139,7 +139,7 @@ export default {
         async onConfirm(){
           const toast = useToast();
           this.showModal = false
-          await fetch(`http://localhost:4000/api/books/${this.bookToDelete.id}`, {
+          await fetch(`${process.env.VUE_APP_BASE_URL}/api/books/${this.bookToDelete.id}`, {
             method: 'DELETE',
           })
 

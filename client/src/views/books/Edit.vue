@@ -88,7 +88,7 @@ export default {
     },
     methods:{
         async fetchBook(id){
-            const res = await fetch(`http://localhost:4000/api/books/${id}`)
+            const res = await fetch(`${process.env.VUE_APP_BASE_URL}/api/books/${id}`)
             const data = await res.json()
             if(res.ok){
                 return data
@@ -110,7 +110,7 @@ export default {
 
 
             try {
-                const res = await fetch(`http://localhost:4000/api/books/${id}`, {
+                const res = await fetch(`${process.env.VUE_APP_BASE_URL}/api/books/${id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",

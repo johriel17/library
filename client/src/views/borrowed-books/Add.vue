@@ -89,7 +89,7 @@ export default {
             // console.log(borrowedBookData)
 
             try {
-                const res = await fetch("http://localhost:4000/api/borrowed-books", {
+                const res = await fetch(`${process.env.VUE_APP_BASE_URL}/api/borrowed-books`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -113,7 +113,7 @@ export default {
             }
         },
         async fetchBooks() {
-            const res = await fetch('http://localhost:4000/api/select/select-book')
+            const res = await fetch(`${process.env.VUE_APP_BASE_URL}/api/select/select-book`)
             const data = await res.json()
             this.books = data
         }

@@ -105,20 +105,20 @@ export default {
     },
     methods : {
         async fetchBorrowedBooks() {
-            const res = await fetch('http://localhost:4000/api/borrowed-books')
+            const res = await fetch(`${process.env.VUE_APP_BASE_URL}/api/borrowed-books`)
             const data = await res.json()
             this.borrowedBooks = data.borrowed_books
             this.pagination = data.pagination
         },
         async search(searchTxt){
           this.searchTxt = searchTxt
-          const res = await fetch(`http://localhost:4000/api/borrowed-books?search=${searchTxt}`)
+          const res = await fetch(`${process.env.VUE_APP_BASE_URL}/api/borrowed-books?search=${searchTxt}`)
           const data = await res.json()
           this.borrowedBooks = data.borrowed_books
           this.pagination = data.pagination
         },
         async changePage(page){
-          const res = await fetch(`http://localhost:4000/api/borrowed-books?search=${this.searchTxt}&page=${page}`)
+          const res = await fetch(`${process.env.VUE_APP_BASE_URL}/api/borrowed-books?search=${this.searchTxt}&page=${page}`)
           const data = await res.json()
           this.borrowedBooks = data.borrowed_books
           this.pagination = data.pagination
@@ -135,7 +135,7 @@ export default {
         async onConfirm(){
           const toast = useToast();
           this.showModal = false
-          await fetch(`http://localhost:4000/api/borrowed-books/${this.bookToDelete.id}/${this.bookToDelete.book_id}`, {
+          await fetch(`${process.env.VUE_APP_BASE_URL}/api/borrowed-books/${this.bookToDelete.id}/${this.bookToDelete.book_id}`, {
             method: 'DELETE',
           })
 

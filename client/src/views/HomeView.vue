@@ -57,17 +57,17 @@ export default {
       this.$router.push('/borrowed-books')
     },
     async countBooks(){
-      const res = await fetch('http://localhost:4000/api/dashboard/books-count')
+      const res = await fetch(`${process.env.VUE_APP_BASE_URL}/api/dashboard/books-count`)
       const data = await res.json()
       return data
     },
     async countBorrwedBooks(){
-      const res = await fetch('http://localhost:4000/api/dashboard/borrowed-count')
+      const res = await fetch(`${process.env.VUE_APP_BASE_URL}/api/dashboard/borrowed-count`)
       const data = await res.json()
       return data
     },
     async countNotReturnedBooks(){
-      const res = await fetch('http://localhost:4000/api/dashboard/not-returned-count')
+      const res = await fetch(`${process.env.VUE_APP_BASE_URL}/api/dashboard/not-returned-count`)
       const data = await res.json()
       return data
     }

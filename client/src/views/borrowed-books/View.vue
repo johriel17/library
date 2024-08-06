@@ -79,7 +79,7 @@ export default {
     },
     methods : {
         async fetchBorrowedBook(id) {
-            const res = await fetch(`http://localhost:4000/api/borrowed-books/${id}`)
+            const res = await fetch(`${process.env.VUE_APP_BASE_URL}/api/borrowed-books/${id}`)
             const data = await res.json()
 
             if(res.ok){
@@ -101,7 +101,7 @@ export default {
         async onConfirm(){
           const toast = useToast();
           this.showModal = false
-          await fetch(`http://localhost:4000/api/borrowed-books/${this.borrowedBookToDelete.id}/${this.borrowedBookToDelete.book_id}`, {
+          await fetch(`${process.env.VUE_APP_BASE_URL}/api/borrowed-books/${this.borrowedBookToDelete.id}/${this.borrowedBookToDelete.book_id}`, {
             method: 'DELETE',
           })
 
@@ -118,7 +118,7 @@ export default {
         async handleReturnBook(returnDate, id, book_id){
           const toast = useToast()
             try{
-                const res = await fetch(`http://localhost:4000/api/borrowed-books/return/${id}/${book_id}`, {
+                const res = await fetch(`${process.env.VUE_APP_BASE_URL}/api/borrowed-books/return/${id}/${book_id}`, {
                   method : 'PUT',
                   headers : {
                     'Content-Type' : 'application/json'
@@ -137,7 +137,7 @@ export default {
         },
         async notify(){
           const toast = useToast()
-          const res = await fetch(`http://localhost:4000/api/borrowed-books/notify?dueDate=${this.borrowedBook.due_date}&email=${this.borrowedBook.borrower_email}`)
+          const res = await fetch(`${process.env.VUE_APP_BASE_URL}/api/borrowed-books/notify?dueDate=${this.borrowedBook.due_date}&email=${this.borrowedBook.borrower_email}`)
           if(res.ok){
             toast.success("Email sent!")
           }

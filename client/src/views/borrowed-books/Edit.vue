@@ -125,7 +125,7 @@ export default {
   },
   methods: {
     async fetchBorrowedBoook(id) {
-      const res = await fetch(`http://localhost:4000/api/borrowed-books/${id}`);
+      const res = await fetch(`${process.env.VUE_APP_BASE_URL}/api/borrowed-books/${id}`);
       const data = await res.json();
       if (res.ok) {
         return data;
@@ -146,7 +146,7 @@ export default {
       // console.log(borrowedBookData)
 
       try {
-        const res = await fetch(`http://localhost:4000/api/borrowed-books/${id}`, {
+        const res = await fetch(`${process.env.VUE_APP_BASE_URL}/api/borrowed-books/${id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -170,7 +170,7 @@ export default {
       }
     },
     async fetchBooks() {
-      const res = await fetch("http://localhost:4000/api/select/select-book");
+      const res = await fetch(`${process.env.VUE_APP_BASE_URL}/api/select/select-book`);
       const data = await res.json();
       this.books = data;
     },

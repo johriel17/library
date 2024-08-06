@@ -83,7 +83,7 @@ export default {
     },
     methods : {
         async fetchBook(id) {
-            const res = await fetch(`http://localhost:4000/api/books/${id}`)
+            const res = await fetch(`${process.env.VUE_APP_BASE_URL}/api/books/${id}`)
             const data = await res.json()
 
             if(res.ok){
@@ -102,7 +102,7 @@ export default {
         async onConfirm(){
           const toast = useToast();
           this.showModal = false
-          await fetch(`http://localhost:4000/api/books/${this.bookToDelete.id}`, {
+          await fetch(`${process.env.VUE_APP_BASE_URL}/api/books/${this.bookToDelete.id}`, {
             method: 'DELETE',
           })
 
@@ -118,7 +118,7 @@ export default {
         },
         async handleBorrowBook(borrowedBook) {
           const toast = useToast()
-          const res = await fetch('http://localhost:4000/api/books/borrow-book', {
+          const res = await fetch(`${process.env.VUE_APP_BASE_URL}/api/books/borrow-book`, {
             method : 'POST',
             headers : {
               'Content-Type' : 'application/json'
