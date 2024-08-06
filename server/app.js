@@ -19,6 +19,8 @@ app.use('/api/books', booksRoute)
 app.use('/api/dashboard', dashboardRoute)
 app.use('/api/borrowed-books', borrowedBooksRoute)
 app.use('/api/select', selectRoute)
+app.use('/api/roles', booksRoute)
+app.use('/api/users', booksRoute)
 
 app.listen(PORT, () => {
     console.log(`listening to port ${PORT}`)
