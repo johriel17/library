@@ -1,7 +1,7 @@
 import express from 'express'
 import cors from 'cors'
-
-const PORT = 4000
+import path, {dirname} from 'path'
+import { fileURLToPath } from 'url';
 
 //routes
 import booksRoute from './routes/booksRoute.js'
@@ -22,6 +22,17 @@ app.use('/api/select', selectRoute)
 app.use('/api/roles', booksRoute)
 app.use('/api/users', booksRoute)
 
+
+
+const MODE = process.env.MODE
+
+if(MODE === 'production'){
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
+    app.use(express.static(path.join(__dirname, "../client/dist")));
+}
+
+const PORT  = process.env.PORT || 4000;
 app.listen(PORT, () => {
     console.log(`listening to port ${PORT}`)
 })
