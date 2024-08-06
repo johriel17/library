@@ -30,6 +30,11 @@ if(MODE === 'production'){
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = dirname(__filename);
     app.use(express.static(path.join(__dirname, "../client/dist")));
+
+    app.get('*', (req,res) => 
+        res.sendFile(path.join(__dirname, "../client/dist/index.html"))
+    )
+
 }
 
 const PORT  = process.env.PORT || 4000;
